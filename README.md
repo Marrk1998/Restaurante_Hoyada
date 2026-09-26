@@ -14,6 +14,26 @@ python app.py
 
 La base `restaurante.db` se crea automáticamente con categorías, productos, un restaurante y configuración inicial. La dirección inicia como **“Dirección por confirmar”** para no publicar una ubicación inventada; actualízala desde el panel cuando corresponda. Abre `http://127.0.0.1:5000`.
 
+## Despliegue en Render
+
+Crea un **Web Service** desde este repositorio y configura:
+
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `gunicorn app:app --bind 0.0.0.0:$PORT`
+
+Define estas variables de entorno en Render antes del primer despliegue:
+
+| Variable | Valor |
+| --- | --- |
+| `SECRET_KEY` | Una clave larga, aleatoria y privada |
+| `ADMIN_USER` | Usuario del panel administrativo |
+| `ADMIN_PASSWORD` | Contraseña segura para el primer inicio |
+| `FLASK_DEBUG` | `0` |
+
+La contraseña de administrador se crea al inicializar la base de datos. Si la cambias después en Render, la contraseña ya guardada no cambia automáticamente.
+
+La aplicación usa SQLite. El sistema de archivos de un servicio Render sin disco persistente es efímero; los pedidos, reservas y cambios del panel pueden perderse al reiniciar o desplegar. Para conservarlos, utiliza un plan que admita **Persistent Disk**, móntalo en `/var/data` y configura `DATABASE_PATH` como `/var/data/restaurante.db`. La base local `restaurante.db` no se incluye en el repositorio.
+
 ## Panel
 
 Entra en `/admin` con los valores de `ADMIN_USER` y `ADMIN_PASSWORD` definidos en `.env`. En el primer inicio se crea un usuario `users` con la contraseña almacenada como hash Werkzeug; no existe ninguna contraseña administrativa fija en el código. Desde el panel se gestionan categorías y productos (crear, editar, eliminar, imagen), disponibilidad, destacados, estados de pedidos/reservas y todos los datos del restaurante.

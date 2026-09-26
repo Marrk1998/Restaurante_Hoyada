@@ -192,7 +192,7 @@ def init_db():
     # Keep the catalog editable from the admin panel, but migrate the original
     # starter catalog once to a broader Peruvian menu with dish photography.
     catalog_version = query("SELECT value FROM settings WHERE key='catalog_version'", one=True)
-    if not catalog_version or catalog_version["value"] != "peruvian-v2":
+    if not catalog_version or catalog_version["value"] == "peruvian-v2":
         db.execute("DELETE FROM products")
         db.execute("DELETE FROM categories")
         categories = [
@@ -244,7 +244,7 @@ def init_db():
     # Remove the dessert category and its products from installations that
     # already loaded the previous catalog.
     catalog_version = query("SELECT value FROM settings WHERE key='catalog_version'", one=True)
-    if not catalog_version or catalog_version["value"] != "peruvian-v4":
+    if catalog_version and catalog_version["value"] == "peruvian-v3":
         db.execute(
             "DELETE FROM products WHERE category_id IN "
             "(SELECT id FROM categories WHERE slug='postres')"
@@ -257,7 +257,7 @@ def init_db():
     # This migration runs once and leaves the resulting products editable
     # from the administrator dashboard.
     catalog_version = query("SELECT value FROM settings WHERE key='catalog_version'", one=True)
-    if not catalog_version or catalog_version["value"] != "peruvian-v5":
+    if catalog_version and catalog_version["value"] == "peruvian-v4":
         db.execute("DELETE FROM products")
         db.execute("DELETE FROM categories")
         categories = [
