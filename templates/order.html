@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Tu pedido | La Hoyada{% endblock %}
+{% block content %}
+<section class="container py-5">
+  <p class="eyebrow">PEDIDO</p>
+  <h1 class="display-5 fw-bold mb-4">Confirma tu pedido</h1>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h4 mb-0">Resumen</h2>
+            {% if items %}<button class="btn btn-sm btn-outline-danger" type="button" data-clear-cart>Cancelar orden</button>{% endif %}
+          </div>
+          {% if items %}
+            {% for i in items %}
+              <div class="d-flex justify-content-between align-items-center gap-2 border-bottom py-3">
+                <span>{{ i.quantity }} × {{ i.name }}</span>
+                <div class="d-flex align-items-center gap-2">
+                  <b>S/ {{ "%.2f"|format(i.subtotal) }}</b>
+                  <button class="btn btn-sm btn-outline-danger" type="button" data-remove="{{ i.id }}" aria-label="Cancelar {{ i.name }}">×</button>
+                </div>
+              </div>
+            {% endfor %}
+            <div class="d-flex justify-content-between pt-3 fs-5"><span>Total</span><b>S/ {{ "%.2f"|format(total) }}</b></div>
+          {% else %}
+            <p>Tu carrito está vacío. <a class="text-brand" href="{{ url_for('menu') }}">Explora la carta.</a></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if items %}
+      <div class="col-lg-7">
+        <form class="card border-0 shadow-sm" method="post">
+          <div class="card-body">
+            <h2 class="h4 mb-4">Datos de entrega</h2>
+            <div class="mb-3"><label class="form-label" for="name">Nombre completo</label><input class="form-control" id="name" name="name" required></div>
+            <div class="mb-3"><label class="form-label" for="phone">Teléfono</label><input class="form-control" id="phone" name="phone" required type="tel"></div>
+            <div class="mb-3"><label class="form-label" for="address">Dirección</label><input class="form-control" id="address" name="address" required></div>
+            <div class="mb-3"><label class="form-label" for="notes">Notas (opcional)</label><textarea class="form-control" id="notes" name="notes" rows="3"></textarea></div>
+            <button class="btn btn-brand" type="submit">Enviar pedido</button>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</section>
+<section class="container pb-5" aria-labelledby="order-video-title">
+  <h2 class="h4 mb-3" id="order-video-title">Un momento en La Hoyada</h2>
+  <div class="order-video-frame ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm">
+    <video class="order-video" controls playsinline preload="metadata" aria-label="Video de Restaurante La Hoyada">
+      <source src="{{ url_for('static', filename='video/video3.mp4') }}" type="video/mp4">
+      Tu navegador no puede reproducir este video.
+    </video>
+  </div>
+</section>
+{% endblock %}

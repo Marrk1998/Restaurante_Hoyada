@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Carta | Restaurante La Hoyada{% endblock %}
+
+{% block content %}
+{# Página de carta: las categorías y productos llegan desde la base de datos. #}
+<section class="container py-5">
+  <header class="mb-4">
+    <p class="eyebrow">NUESTRA CARTA</p>
+    <h1 class="display-4 fw-bold">Perú en cada plato</h1>
+    <p class="lead text-secondary">
+      Sopas caseras, entradas, segundos criollos y especialidades peruanas
+      preparados al momento.
+    </p>
+  </header>
+
+  <div class="row g-4">
+    {# Menú lateral: crea enlaces automáticos para cada categoría. #}
+    <aside class="col-lg-3">
+      <nav
+        class="list-group sticky-lg-top"
+        style="top: 90px"
+        aria-label="Categorías de la carta"
+      >
+        {% for category in categories %}
+          <a
+            class="list-group-item list-group-item-action"
+            href="#{{ category.slug }}"
+          >
+            {{ category.name }}
+          </a>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <div class="col-lg-9">
+      {# Cada sección agrupa los productos de una categoría. #}
+      {% for category in categories %}
+        <section
+          class="menu-section mb-5"
+          id="{{ category.slug }}"
+          aria-labelledby="category-{{ category.slug }}"
+        >
+          <div class="menu-section-heading d-flex align-items-center gap-3 mb-3">
+            <h2 id="category-{{ category.slug }}" class="mb-0">
+              {{ category.name }}
+            </h2>
+            <span class="flex-grow-1 border-bottom" aria-hidden="true"></span>
+          </div>
+
+          <div class="row g-4">
+            {# Filtra los productos que pertenecen a la categoría actual. #}
+            {% for product in products if product.category_slug == category.slug %}
+              <div class="col-md-6">
+                <article class="card menu-card h-100 border-0 shadow-sm">
+                  {#
+                    IMAGEN LOCAL DEL PRODUCTO:
+                    product_image() relaciona el nombre del plato con un
+                    archivo fijo dentro de static/img/platos/. Por ejemplo,
+                    "Lomo saltado" usa lomo-saltado.jpg.
+
+                    Para cambiar una fotografía:
+                    1. Abre static/img/platos/.
+                    2. Reemplaza el archivo del plato.
+                    3. Conserva exactamente el mismo nombre y extensión.
+
+                    No es necesario modificar este archivo, app.py ni la base
+                    de datos para actualizar una imagen.
+                  #}
+                  <div class="menu-card-image">
+                    {# El botón abre el modal Bootstrap sin salir de la página. #}
+                    <button
+                      class="menu-image-trigger"
+                      type="button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#imageModal{{ product.id }}"
+                      aria-label="Ampliar imagen de {{ product.name }}"
+                    >
+                      <img
+                        src="{{ product_image(product.name) }}"
+                        class="img-fluid card-img-top menu-product-image"
+                        alt="{{ product.name }} peruano"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/platos/ceviche-clasico.jpg') }}';"
+                      >
+                    </button>
+                  </div>
+
+                  <div class="card-body d-flex flex-column">
+                    <h3 class="h5 mb-2">{{ product.name }}</h3>
+                    <p class="text-secondary mb-3">
+                      {{ product.description }}
+                    </p>
+
+                    <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                      <strong class="text-brand">
+                        S/ {{ "%.2f"|format(product.price) }}
+                      </strong>
+
+                      {#
+                        El atributo data-add es utilizado por app.js para
+                        agregar el producto al carrito sin recargar la página.
+                      #}
+                      <button
+                        class="btn btn-sm btn-outline-brand add"
+                        type="button"
+                        data-add="{{ product.id }}"
+                        aria-label="Agregar {{ product.name }} al carrito"
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              {#
+                Modal individual del producto:
+                - El fondo oscuro mejora el contraste.
+                - data-bs-backdrop="true" permite cerrar al hacer clic fuera.
+                - La imagen usa object-fit: contain para conservar su proporción.
+              #}
+              <div
+                class="modal fade"
+                id="imageModal{{ product.id }}"
+                tabindex="-1"
+                aria-labelledby="imageModalLabel{{ product.id }}"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                  <div class="modal-content bg-dark border-0">
+                    <div class="modal-header border-secondary">
+                      <h2
+                        class="modal-title h5 text-white"
+                        id="imageModalLabel{{ product.id }}"
+                      >
+                        {{ product.name }}
+                      </h2>
+                      <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar imagen"
+                      ></button>
+                    </div>
+                    <div class="modal-body text-center p-2 p-md-4">
+                      <img
+                        src="{{ product_image(product.name) }}"
+                        class="img-fluid menu-modal-image"
+                        alt="{{ product.name }} peruano ampliado"
+                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/platos/ceviche-clasico.jpg') }}';"
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              {# Mensaje mostrado si una categoría no tiene productos activos. #}
+              <div class="col-12">
+                <p class="text-secondary">No hay productos disponibles en esta categoría.</p>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
